@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0A84FF" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="备忘录" />
+  <link rel="apple-touch-icon" href="icon-180.png" />
+  <link rel="icon" type="image/png" href="icon-192.png" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="stylesheet" href="styles.css" />
+  <title>备忘录 · 生活 & 工作</title>
+</head>
+<body>
+  <div class="app">
+    <header class="app-bar">
+      <div class="app-bar-inner">
+        <h1 class="app-title">备忘录</h1>
+        <button id="settingsBtn" class="icon-btn" aria-label="设置">⚙︎</button>
+      </div>
+    </header>
+
+    <nav class="tabs" id="tabs">
+      <button class="tab active" data-cat="life">
+        <span class="tab-emoji">🏠</span><span>生活</span>
+      </button>
+      <button class="tab" data-cat="work">
+        <span class="tab-emoji">💼</span><span>工作</span>
+      </button>
+    </nav>
+
+    <main class="content">
+      <div id="dueBanner" class="due-banner hidden"></div>
+      <ul id="list" class="list"></ul>
+      <div id="empty" class="empty hidden">
+        <div class="empty-emoji">📝</div>
+        <p>这里还没有备忘</p>
+        <p class="empty-sub">点右下角的 “＋” 添加第一条吧</p>
+      </div>
+    </main>
+
+    <button id="addFab" class="fab" aria-label="添加备忘">＋</button>
+  </div>
+
+  <!-- 添加 / 编辑 弹层 -->
+  <div class="sheet-backdrop" id="sheet">
+    <div class="sheet" role="dialog" aria-modal="true">
+      <div class="sheet-grabber"></div>
+      <h2 class="sheet-title" id="sheetTitle">新建备忘</h2>
+      <form id="itemForm">
+        <label class="field">
+          <span class="field-label">标题</span>
+          <input type="text" id="fTitle" placeholder="例如：交水电费 / 提交周报" required maxlength="80" />
+        </label>
+        <label class="field">
+          <span class="field-label">备注（可选）</span>
+          <textarea id="fNote" rows="2" placeholder="补充说明…" maxlength="300"></textarea>
+        </label>
+        <label class="field">
+          <span class="field-label">截止时间 / Deadline</span>
+          <input type="datetime-local" id="fDeadline" />
+        </label>
+        <label class="field field-row">
+          <span class="field-label">开启提醒</span>
+          <input type="checkbox" id="fRemind" class="switch" />
+        </label>
+        <label class="field" id="remindOffsetWrap">
+          <span class="field-label">提前提醒</span>
+          <select id="fOffset">
+            <option value="0">准点提醒</option>
+            <option value="5">提前 5 分钟</option>
+            <option value="15">提前 15 分钟</option>
+            <option value="60">提前 1 小时</option>
+            <option value="1440">提前 1 天</option>
+          </select>
+        </label>
+        <div class="sheet-actions">
+          <button type="button" class="btn btn-ghost" id="cancelBtn">取消</button>
+          <button type="submit" class="btn btn-primary" id="saveBtn">保存</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 提醒弹窗 -->
+  <div class="alert-backdrop hidden" id="alertModal">
+    <div class="alert-card" role="alertdialog" aria-modal="true">
+      <div class="alert-bell">🔔</div>
+      <h3 class="alert-title" id="alertTitle">提醒</h3>
+      <p class="alert-body" id="alertBody"></p>
+      <div class="alert-actions">
+        <button class="btn btn-ghost" id="alertLater">稍后</button>
+        <button class="btn btn-primary" id="alertDone">知道了</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 设置弹层 -->
+  <div class="sheet-backdrop" id="settingsSheet">
+    <div class="sheet" role="dialog" aria-modal="true">
+      <div class="sheet-grabber"></div>
+      <h2 class="sheet-title">设置</h2>
+      <div class="settings-block">
+        <div class="settings-row">
+          <div>
+            <div class="settings-name">推送提醒</div>
+            <div class="settings-desc" id="notifState">未开启</div>
+          </div>
+          <button class="btn btn-primary btn-sm" id="enableNotif">开启</button>
+        </div>
+        <div class="settings-row">
+          <div>
+            <div class="settings-name">数据</div>
+            <div class="settings-desc" id="dataStat">—</div>
+          </div>
+          <button class="btn btn-danger btn-sm" id="clearDone">清除已完成</button>
+        </div>
+      </div>
+      <div class="install-guide">
+        <div class="settings-name">安装到 iPhone 主屏幕</div>
+        <ol class="guide-steps">
+          <li>用 <b>Safari</b> 打开本页面（不要用微信/其他 App 内置浏览器）。</li>
+          <li>点击底部工具栏的 <b>分享</b> 图标 ⬆︎。</li>
+          <li>下滑选择 <b>“添加到主屏幕”</b>。</li>
+          <li>点 <b>添加</b>，桌面就会出现“备忘录”图标，像原生 App 一样使用。</li>
+        </ol>
+        <p class="guide-note">提示：iOS 上网页 App 在<b>打开时</b>会按时弹窗提醒；若需锁屏后台提醒，可让我再给你一套 Swift 原生版。</p>
+      </div>
+      <div class="sheet-actions">
+        <button type="button" class="btn btn-ghost" id="settingsClose">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
